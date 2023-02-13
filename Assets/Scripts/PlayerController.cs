@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -29,14 +27,14 @@ public class PlayerController : MonoBehaviour
         {
             if (t.gameObject.name != "Player") { _cameraTransform = t; break; }
         }
-        Debug.Log(_cameraTransform.gameObject.name);
         _movementInput = Vector3.zero;
         _currentSpeedMultiplier = _defaultMultiplier;
     }
 
     // Update is called once per frame
     void Update()
-    {   Rotation();
+    {
+        Rotation();
         CheckForSprinting();
         ReadMovementInput();
         ApplyGravity();
@@ -45,7 +43,7 @@ public class PlayerController : MonoBehaviour
 
     private void Rotation()
     {
-        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * _mouseXSensitivity;
+        float mouseX = Input.GetAxis("Mouse X") * Time.deltaTime * _mouseXSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * Time.deltaTime * _mouseYSensitivity;
         
         _currentCameraXRotation = Mathf.Clamp(_currentCameraXRotation - mouseY, -90f, 90f);
@@ -83,11 +81,15 @@ public class PlayerController : MonoBehaviour
 
     private void ReadMovementInput()
     {
-        float verticalInput = Input.GetAxis("Vertical");
+        float forwardInput = Input.GetAxis("Vertical");
         float horizontalInput = Input.GetAxis("Horizontal");
 
-        Vector3 directionRelativeToCamera = Quaternion.AngleAxis(_cameraTransform.transform.rotation.eulerAngles.y, Vector3.up) * new Vector3(horizontalInput, 0f, verticalInput).normalized;
+        //Vector3 directionRelativeToCamera = Quaternion.AngleAxis(_cameraTransform.transform.rotation.eulerAngles.y, Vector3.up) * new Vector3(horizontalInput, 0f, verticalInput).normalized;
+        //_movementInput = (directionRelativeToCamera * _moveSpeed * _currentSpeedMultiplier * Time.deltaTime);
         
-        _movementInput = (directionRelativeToCamera * _moveSpeed * _currentSpeedMultiplier * Time.deltaTime);
+        //Since the y rotation of the Camera will be the same as the player, we can just use 
+        //the player's transform's forward and right vectors
+        float deltaSpeed = _moveSpeed * _currentSpeedMultiplier * Time.deltaTime;
+        _movementInput = ((transform.forward*forwardInput + transform.right*horizontalInput)*deltaSpeed);
     }
 }
